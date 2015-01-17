@@ -4,20 +4,23 @@ layout: default
 
 <div class="home">
 
-  <h1 class="page-heading">Posts</h1>
+<h3>
+  Cordwainer is a set of tutorials about how Shoes works from heel to toe, frontend to backend<i>s</i>, <code>do</code> to <code>end</code>.
+  For now they will just be in the order I write them, but if you can think of a better way to lay them out, or this site, then please feel free to talk to me about it at <a href="https://github.com/KCErb/cordwainer">the repo</a>.
+</h3>
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+<h1>
+  The Tutorials
+</h1>
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
-
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+<div class="trigger">
+  {% for page in site.pages %}
+  {% if page.title %}
+  <div>
+    <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
 
 </div>
