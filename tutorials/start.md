@@ -91,9 +91,9 @@ We're going to go through this file a few lines at a time to understand it all. 
 
 The first few lines tell us that if we want to learn why `shoes-core` uses both `shoes` and `shoes-stub` we'll need to go into the `ext/install/Rakefile` and see it in the context of installation. Since I'd like to hold installation off for another installation, let's keep on moving and trust that this was a wise choice (for now).
 
-The next lines define two functions: `mac_move_to_link_dir` and `mac_readlink_f` we'll come back to them when they get called.
+The next lines define two functions: `mac_move_to_link_dir` and `mac_readlink_f`.
 
-Next we come to a `case` statement. It says `SCRIPT` is either `mac_readlink_f` or just `readlink -f` depending on whether the script is run on a mac (darwin). Since I want to stay somewhat focused I'm going to leave as an exercise to the reader how the `mac_readlink_f` function works and instead focus on what `readlink -f` means.
+Next we come to a `case` statement. It says `SCRIPT` is either `mac_readlink_f` or just `readlink -f` depending on whether the script is run on a mac (darwin). Since I want to stay somewhat focused, I'm going to leave as an exercise to the reader how the `mac_readlink_f` function works, and instead focus on what `readlink -f` means.
 
 After reading the [stackoverflow post mentioned in the comment](http://stackoverflow.com/questions/242538/unix-shell-script-find-out-which-directory-the-script-file-resides/1638397#1638397) it looks like we're just setting the `SCRIPT` variable to be the path to the `shoes-stub` script we're looking at, then finding the directory of that script as `SCRIPTPATH` and finally adding `shoes-backend`. To make this clear I added some `echo`s after the backend_file definition like so:
 ```sh
@@ -131,3 +131,116 @@ Shoes::UI::Picker.new.run
 ```
 
 This little bit of code modifies our `LOAD_PATH` so that we can use a simple `require` and then `run` an instance of `Shoes::UI::Picker`. The definition of this class is over in [shoes-core/lib/shoes/ui/picker](https://github.com/shoes/shoes4/blob/master/shoes-core/lib/shoes/ui/picker.rb).
+
+When the `run` method of `Picker` is called it
+  * "bundles"
+  * gets a generator file
+  * writes the generator file
+
+Let's talk about each of those steps.
+
+#### bundle
+
+I was a little confused about this bit of code, and the fantastic [@jasonrclark](https://github.com/jasonrclark) answered my question like so
+
+> The key thing is what bundler/setup actually does, and that's setting up the load paths for your gems so that only things in your Gemfile are available. This is super important for local dev because our Gemfile forces everything to use the source copy rather than any gem installed copies of shoes.
+
+So the point is that at this stage of development, the picker is mostly about getting the development environment setup. It's all primed to select backends, but that's not really the point right now.
+
+In [this helpful explanation](https://github.com/shoes/shoes4/issues/1034#issuecomment-70397736) of the picker, Jason goes on to explain that bundler next requires the *correct* gems from the Gemfile and avoids anything that's installed.
+
+### generator_file = select_generator
+
+This chunk of code relies on `Gem` which is provided by [rubygems](https://rubygems.org/) and searches through each of the gems on the load path. Right now that means `shoes-core`, `shoes-package`, and `shoes-swt`. The only one of those that contains a `generate-backend.rb` is swt and the method returns the path to that file.
+
+### write_backend
+
+The first thing we do is define a function for generating the backend. For SWT that function looks like this:
+
+```ruby
+require 'rbconfig'
+
+def generate_backend(path)
+  if RbConfig::CONFIG["host_os"] =~ /darwin/
+    options = "-J-XstartOnFirstThread"
+  end
+
+  "jruby --1.9 #{options} #{path}/shoes-swt"
+end
+```
+
+The output of this function is a string which will later be run in a shell script. That string will contain the string `"-J-XstartOnFirstThread"` if the host is using darwin architecture.
+
+We do this because SWT needs to create a `Display` widget, and it can't do that on the OSX / Mac / darwin architecture unless it's on the `main` thread. Jruby has an option for doing just that: `-J-XstartOnFirstThread` and so it must be passed in when jruby tries to run the swt files. For another approach to learning about this problem check out [this chunk of the wiki](https://github.com/shoes/shoes4/wiki/SWT---JRuby-bootstrap-guide#a-little-swt-program).
+
+After defining that function, `Picker` goes through some hoops (note that we use the `SHOES_PICKER_BIN_DIR` here) to get the exact path to the top-level bin directory and hands it over to `generate_backend`. The end result is that a file gets written called `shoes-backend`. On my machine this file contains the following line of text:
+
+```
+jruby --1.9 -J-XstartOnFirstThread /Users/KC/Programming/shoes4/bin/shoes-swt
+```
+
+## Back to `shoes-stub`
+
+OK, so we left shoes-stub to find out what `$SCRIPTPATH/shoes-picker $SCRIPTPATH` does. The answer was it writes out a file that contains a shell command starting with `jruby` and ending with a path to the `shoes-swt` script.
+
+What follows next is that the last piece of `shoes-stub` just runs that file (the `cat` command means: read the file).
+
+So that's it for `shoes-stub`. All that this script did (essentially) was point at the `shoes-swt` binary and execute it. It might seem like a lot of work for such a simple task, but the complexity is necessary because of the division between running an app from source (like a developer does) and running it from the gem (which we haven't discussed yet).
+
+
+## shoes-swt
+
+Just like the top-level `shoes` script, this one is pointing us to the script over in the gem's `bin` directory: [`shoes-swt/bin/shoes-swt`](https://github.com/shoes/shoes4/blob/master/shoes-swt/bin/shoes-swt)
+
+The first half of this duplicates the work that bundler did back in `Picker` in case that script didn't get called, and the last bit is:
+
+```ruby
+require 'shoes/ui/cli'
+Shoes::CLI.new.run ARGV
+```
+
+So let's dive into the CLI a bit
+
+## Shoes::CLI
+
+CLI stands for Command Line Interface. That means this file is the one that is supposed to handle calls to the `shoes` command-line app runner.
+
+So let's take a look at the `run` method and remember that ARGV has only 1 argument, the (relative) file path.
+
+<hr>
+**Sidenote**: Don't miss out on the `initialize` here which sets up the packager!
+<hr>
+
+`run` does the following:
+1. parses the arguments
+2. handles the case where 0 arguments are given
+3. runs the app with the packager or the `execute_app` method.
+
+### 1. Parse the Arguments
+
+This step uses ruby's built-in `OptionParser` to simultaneously create an options summary and define what the CLI should do when encountering the different options (See the [docs](http://ruby-doc.org/stdlib-2.2.0/libdoc/optparse/rdoc/OptionParser.html)). The intent then is for the explanation of what the opts do and the implementation to be unified, so instead of me explaining this step I'll let you just read it.
+
+After the setup, it actually parses the args and returns the `OptionParser` object.
+
+### 2. Handle `args.empty?`
+
+Next, if there are no arguments, as in
+
+```
+$ shoes
+```
+
+then we exit after outputting the banner and program name like so:
+
+```
+Usage: shoes [-h] [-p package] file
+Try 'shoes --help' for more information
+```
+
+### 3. Package or Run
+
+Since in this example we are not packaging, I'll ignore what `@packager.run` does and just look at `execute_app`. First it `unshift`s the current directory and requires the `shoes/swt.rb`. That little `require` is really the leather of shoes. It's the part where all of the models, classes, constants etc. get defined and loaded. Since our program doesn't use those, I'm going to skip it for now. Next it `loads` the app (in our case `puts 'Hello World'`). And it is this last command `load` that **actually runs the app**.
+
+## Conclusion
+
+In this tutorial we walked through all of the code necessary to run a small bit of Ruby code. A lot happened, but most of the work was spent setting up and running the development environment. In the end we defined the entire shoes library and *then* ran the app.
