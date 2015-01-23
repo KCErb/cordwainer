@@ -89,13 +89,14 @@ OK, so if we head over to `/shoes-core/bin/shoes` then we'll see a sym-link to a
 
 We're going to go through this file a few lines at a time to understand it all. Let's start with the comment.
 
-The first few lines tell us that if we want to learn why `shoes-core` uses both `shoes` and `shoes-stub` we'll need to go into the `ext/install/Rakefile` and see it in the context of installation. Since I'd like to hold installation off for another installation, let's keep on moving and trust that this was a wise choice (for now).
+The first few lines tell us that if we want to learn why `shoes-core` uses both `shoes` and `shoes-stub` we'll need to go into the `ext/install/Rakefile` and see it in the context of installation. Since I'd like to hold installation off for another tutorial, let's keep on moving and trust that this was a wise choice (for now).
 
 The next lines define two functions: `mac_move_to_link_dir` and `mac_readlink_f`.
 
 Next we come to a `case` statement. It says `SCRIPT` is either `mac_readlink_f` or just `readlink -f` depending on whether the script is run on a mac (darwin). Since I want to stay somewhat focused, I'm going to leave as an exercise to the reader how the `mac_readlink_f` function works, and instead focus on what `readlink -f` means.
 
-After reading the [stackoverflow post mentioned in the comment](http://stackoverflow.com/questions/242538/unix-shell-script-find-out-which-directory-the-script-file-resides/1638397#1638397) it looks like we're just setting the `SCRIPT` variable to be the path to the `shoes-stub` script we're looking at, then finding the directory of that script as `SCRIPTPATH` and finally adding `shoes-backend`. To make this clear I added some `echo`s after the backend_file definition like so:
+After reading the [stackoverflow post mentioned in the comment](http://stackoverflow.com/questions/242538/unix-shell-script-find-out-which-directory-the-script-file-resides/1638397#1638397) it looks like we're just setting the `SCRIPT` variable to be the path to the `shoes-stub` script we're looking at, then finding the directory of that script as `SCRIPTPATH` and finally adding `shoes-backend`. To make this clear, I added some `echo`s after the backend_file definition like so:
+
 ```sh
 BACKEND_FILE="$SCRIPTPATH/shoes-backend"
 echo $SCRIPT
@@ -114,7 +115,7 @@ and got the following output when running the script alone (on my mac I just dou
 
 The next thing we do is see if a `shoes-backend` script actually exists in the directory, if so do nothing, if not then you need to run `shoes-picker` and hand it `SCRIPTPATH`.
 <hr>
-**Sidenote** The if statement here takes option `-e`. I found a guide at [tldp.org](http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_07_01.html)
+**Sidenote** The if statement here takes option `-e` which checks if a file exists. I found a guide at [tldp.org](http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_07_01.html)
 <hr>
 
 ## Shoes-Picker
@@ -139,21 +140,21 @@ When the `run` method of `Picker` is called it
 
 Let's talk about each of those steps.
 
-#### bundle
+#### **bundle**
 
 I was a little confused about this bit of code, and the fantastic [@jasonrclark](https://github.com/jasonrclark) answered my question like so
 
 > The key thing is what bundler/setup actually does, and that's setting up the load paths for your gems so that only things in your Gemfile are available. This is super important for local dev because our Gemfile forces everything to use the source copy rather than any gem installed copies of shoes.
 
-So the point is that at this stage of development, the picker is mostly about getting the development environment setup. It's all primed to select backends, but that's not really the point right now.
+So the point is that at this stage of development, the picker is mostly about getting the development environment set up. It's all primed to select backends, but that's not really the point right now.
 
 In [this helpful explanation](https://github.com/shoes/shoes4/issues/1034#issuecomment-70397736) of the picker, Jason goes on to explain that bundler next requires the *correct* gems from the Gemfile and avoids anything that's installed.
 
-### generator_file = select_generator
+#### **generator\_file = select\_generator**
 
 This chunk of code relies on `Gem` which is provided by [rubygems](https://rubygems.org/) and searches through each of the gems on the load path. Right now that means `shoes-core`, `shoes-package`, and `shoes-swt`. The only one of those that contains a `generate-backend.rb` is swt and the method returns the path to that file.
 
-### write_backend
+#### **write\_backend**
 
 The first thing we do is define a function for generating the backend. For SWT that function looks like this:
 
@@ -205,24 +206,25 @@ So let's dive into the CLI a bit
 
 CLI stands for Command Line Interface. That means this file is the one that is supposed to handle calls to the `shoes` command-line app runner.
 
-So let's take a look at the `run` method and remember that ARGV has only 1 argument, the (relative) file path.
+So let's take a look at [the `run` method](https://github.com/shoes/shoes4/blob/master/shoes-core/lib/shoes/ui/cli.rb#L52-L65) and remember that ARGV has only 1 argument, the (relative) file path.
 
 <hr>
 **Sidenote**: Don't miss out on the `initialize` here which sets up the packager!
 <hr>
 
 `run` does the following:
+
 1. parses the arguments
 2. handles the case where 0 arguments are given
 3. runs the app with the packager or the `execute_app` method.
 
-### 1. Parse the Arguments
+#### 1. Parse the Arguments
 
-This step uses ruby's built-in `OptionParser` to simultaneously create an options summary and define what the CLI should do when encountering the different options (See the [docs](http://ruby-doc.org/stdlib-2.2.0/libdoc/optparse/rdoc/OptionParser.html)). The intent then is for the explanation of what the opts do and the implementation to be unified, so instead of me explaining this step I'll let you just read it.
+This step uses ruby's built-in `OptionParser` to simultaneously create an options summary and define what the CLI should do when encountering the different options (see the [docs](http://ruby-doc.org/stdlib-2.2.0/libdoc/optparse/rdoc/OptionParser.html)). The intent then is for the explanation of what the opts do and the implementation to be unified, so instead of me explaining this step I'll let you just read it.
 
 After the setup, it actually parses the args and returns the `OptionParser` object.
 
-### 2. Handle `args.empty?`
+#### 2. Handle `args.empty?`
 
 Next, if there are no arguments, as in
 
@@ -237,9 +239,11 @@ Usage: shoes [-h] [-p package] file
 Try 'shoes --help' for more information
 ```
 
-### 3. Package or Run
+#### 3. Package or Run
 
-Since in this example we are not packaging, I'll ignore what `@packager.run` does and just look at `execute_app`. First it `unshift`s the current directory and requires the `shoes/swt.rb`. That little `require` is really the leather of shoes. It's the part where all of the models, classes, constants etc. get defined and loaded. Since our program doesn't use those, I'm going to skip it for now. Next it `loads` the app (in our case `puts 'Hello World'`). And it is this last command `load` that **actually runs the app**.
+Since in this example we are not packaging, I'll ignore what `@packager.run` does and just look at `execute_app`. First it `unshift`s the current directory and requires the `shoes/swt.rb`. That little `require` is really the leather of shoes. It's the part where all of the models, classes, constants etc. get defined and loaded. Since our program doesn't use those, I'm going to skip it for now.
+
+Next we `load` the app (in our case `puts 'Hello World'`). And it is this last command `load` that **actually runs the app**.
 
 ## Conclusion
 
