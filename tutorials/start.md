@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Where to start?
+title: 1. Where to start?
 permalink: /start/
 ---
 
@@ -51,7 +51,9 @@ puts "Hello World"
 
 and we'll run it with
 
-    $ bin/shoes testing/hello.rb
+```
+$ bin/shoes testing/hello.rb
+```
 
 First let's go find that executable. It's in a directory called [`/bin`](https://github.com/shoes/shoes4/blob/master/bin/shoes).
 
@@ -80,7 +82,7 @@ First this script jumps into the `bin` directory and then exports a shell variab
 So let's go find that script!
 
 <hr>
-The `shoes` script over in `shoes-core` is the *real* shoes script, so that means this script is setting up our environment (ENV) for purposes that will be clear later on.
+The `shoes` script over in `shoes-core` is the *real* `shoes` script, so that means this script is setting up our environment (ENV) for purposes that will be clear later on.
 <hr>
 
 ## The *Real* Shoes Executable
@@ -144,7 +146,7 @@ Let's talk about each of those steps.
 
 I was a little confused about this bit of code, and the fantastic [@jasonrclark](https://github.com/jasonrclark) answered my question like so
 
-> The key thing is what bundler/setup actually does, and that's setting up the load paths for your gems so that only things in your Gemfile are available. This is super important for local dev because our Gemfile forces everything to use the source copy rather than any gem installed copies of shoes.
+> The key thing is what bundler/setup actually does, and that's setting up the load paths for your gems so that only things in your Gemfile are available. This is super important for local dev because our Gemfile forces everything to use the source copy rather than any gem-installed copies of Shoes.
 
 So the point is that at this stage of development, the picker is mostly about getting the development environment set up. It's all primed to select backends, but that's not really the point right now.
 
@@ -182,7 +184,7 @@ jruby --1.9 -J-XstartOnFirstThread /Users/KC/Programming/shoes4/bin/shoes-swt
 
 ## Back to `shoes-stub`
 
-OK, so we left shoes-stub to find out what `$SCRIPTPATH/shoes-picker $SCRIPTPATH` does. The answer was it writes out a file that contains a shell command starting with `jruby` and ending with a path to the `shoes-swt` script.
+OK, so we left `shoes-stub` to find out what `$SCRIPTPATH/shoes-picker $SCRIPTPATH` does. The answer was it writes out a file that contains a shell command starting with `jruby` and ending with a path to the `shoes-swt` script.
 
 What follows next is that the last piece of `shoes-stub` just runs that file (the `cat` command means: read the file).
 
@@ -229,7 +231,7 @@ After the setup, it actually parses the args and returns the `OptionParser` obje
 Next, if there are no arguments, as in
 
 ```
-$ shoes
+$ bin/shoes
 ```
 
 then we exit after outputting the banner and program name like so:
@@ -241,10 +243,10 @@ Try 'shoes --help' for more information
 
 #### 3. Package or Run
 
-Since in this example we are not packaging, I'll ignore what `@packager.run` does and just look at `execute_app`. First it `unshift`s the current directory and requires the `shoes/swt.rb`. That little `require` is really the leather of shoes. It's the part where all of the models, classes, constants etc. get defined and loaded. Since our program doesn't use those, I'm going to skip it for now.
+Since in this example we are not packaging, I'll ignore what `@packager.run` does and just look at `execute_app`. First it `unshift`s the current directory and requires the `shoes/swt.rb`. That little `require` is really the leather of Shoes. It's the part where all of the models, classes, constants etc. get defined and loaded. Since our program doesn't use those, I'm going to skip it for now.
 
-Next we `load` the app (in our case `puts 'Hello World'`). And it is this last command `load` that **actually runs the app**.
+Next we `load` the app (in our case `puts "Hello World"`). And it is this last command `load` that **actually runs the app**.
 
 ## Conclusion
 
-In this tutorial we walked through all of the code necessary to run a small bit of Ruby code. A lot happened, but most of the work was spent setting up and running the development environment. In the end we defined the entire shoes library and *then* ran the app.
+In this tutorial we walked through all of the code necessary to run a small bit of Ruby code. A lot happened, but most of the work was spent setting up and running the development environment. In the end we defined the entire Shoes library and *then* ran the app.
