@@ -1,6 +1,7 @@
 ---
 layout: page
 title: 2. Gem Install
+category: executables
 permalink: /gems/
 ---
 
@@ -24,11 +25,13 @@ That walked us quite a bit through the *development* part of getting Shoes fired
 # development purposes
 ```
 
-So I say, while the issue is fresh in mind, and before we really dive into Shoes itself, let's find out what those comments are really about and find out what happens when we run `hello.rb` like so:
+So I say, while the issue is fresh in mind, and before we really dive into Shoes itself, let's find out what those comments are really about and find out what happens when we run `hello.rb` with the installed executable like so:
 
 ```
 $ shoes testing/hello.rb
 ```
+
+This exploration will take us through the multi-gem structure of Shoes. When I wrote this I'd never cut a gem before or even read a tutorial on it. Since then I've done both of those and found there's a lot of overlap with what I have here and some great tutorials out there on gems. So I encourage you to google around for advice on writing Ruby gems to see where some of this comes from (hint `Bundler` does *a lot* of stuff automatically).
 
 ## shoes --pre3
 
@@ -42,7 +45,7 @@ So let's start finding out what happens there.
 
 ## The shoes Gem
 
-Although Shoes contains three gems right now (`core`, `swt`, and `package`) it is also a gem itself (albeit just a tiny little one). Let's take a look at the `gemspec` for the `shoes` gem:
+Although Shoes contains three gems right now (`core`, `swt`, and `package`) it is also a gem itself (albeit just a tiny little one). Let's take a look at the [`gemspec`]() for the `shoes` gem:
 
 ```ruby
 # -*- encoding: utf-8 -*-
@@ -55,8 +58,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Team Shoes"]
   s.email       = ["shoes@librelist.com"]
   s.homepage    = "https://github.com/shoes/shoes4"
-  s.summary     = %q{Shoes is the best little GUI toolkit for Ruby. Shoes runs on JRuby only for now.}
-  s.description = %q{Shoes is the best little GUI toolkit for Ruby. Shoes makes building for Mac, Windows, and Linux super simple. Shoes runs on JRuby only for now.}
+  s.summary     = 'Shoes is the best little GUI toolkit for Ruby. Shoes runs on JRuby only for now.'
+  s.description = 'Shoes is the best little GUI toolkit for Ruby. Shoes makes building for Mac, Windows, and Linux super simple. Shoes runs on JRuby only for now.'
   s.license     = 'MIT'
 
   s.files         = ["LICENSE", "README.md"]
@@ -73,12 +76,12 @@ This bit of code starts off by pulling a version string in from the top-level `V
 
 ## The shoes-core Gem
 
-If you take a look at `shoes-core.gemspec` you'll see a lot in common with `shoes.gemspec` when it comes to authors, version, etc. But there's some new stuff here too
+If you take a look at [`shoes-core.gemspec`](https://github.com/shoes/shoes4/blob/master/shoes-core/shoes-core.gemspec) you'll see a lot in common with `shoes.gemspec` when it comes to authors, version, etc. But there's some new stuff here too
 
 ```ruby
 Gem::Specification.new do |s|
   # ...
-  s.files         = `git ls-files`.split($/)
+  s.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = ["lib"]
 
@@ -88,7 +91,7 @@ Gem::Specification.new do |s|
 end
 ```
 
-First of all, we point the `files` method at a list of ALL THE FILES with `git ls-files`. Then we specify which ones are `test_files` (which seems to be a feature on its way out; see [this](http://stackoverflow.com/questions/18871541/what-is-the-purpose-of-test-files-configuration-in-a-gemspec) stackoverflow discussion) and then we add the `lib` path to the `$LOAD_PATH` when the gem is activated.
+First of all, we point the `files` method at a list of ALL THE FILES by passing to `git ls-files` a reference to `/` or `\` depending on your OS. Then we specify which ones are `test_files` (which seems to be a feature on its way out; see [this](http://stackoverflow.com/questions/18871541/what-is-the-purpose-of-test-files-configuration-in-a-gemspec) stackoverflow discussion) and then we add the `lib` path to the `$LOAD_PATH` when the gem is activated.
 
 These things are pretty standard and can be found in the other Shoes gems.
 
@@ -106,7 +109,7 @@ The file's not all that bad. It's really pretty short. Go ahead and [take a look
 
 The core problem this file solves is [a policy of RubyGems](http://guides.rubygems.org/specification-reference/#executables) about executables.
 
->These files must be executable Ruby files. Files that use bash or other interpreters will not work.
+> These files must be executable Ruby files. Files that use bash or other interpreters will not work.
 Executables included may only be ruby scripts, not scripts for other languages or compiled binaries.
 
 That's normally no big deal, except we need to pass in that JRuby option (start on first thread) if we're running on OS X, and that means we need the executable to be a shell script, *not* a ruby script. What to do?
@@ -117,7 +120,7 @@ The result: I call `shoes` from the command line, RubyGems responds with a copy 
 
 ## Wrap up
 
-Well that answered how `$ shoes testing/hello.rb` works, let's wrap-up by finishing our tour of `shoes.gemspec` in the `shoes-swt` and `shoes-manual` gems.
+Well that answered how `$ shoes testing/hello.rb` works, let's wrap up by finishing our tour of `shoes.gemspec` in the `shoes-swt` and `shoes-manual` gems.
 
 ### shoes-swt
 

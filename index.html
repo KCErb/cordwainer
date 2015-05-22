@@ -5,18 +5,50 @@ layout: default
 <div class="home">
 
 <h3>
-  Cordwainer is a set of tutorials about how Shoes works from heel to toe, frontend to backend<i>s</i>, <code>do</code> to <code>end</code>.
-  For now they will just be in the order I write them, but if you can think of a better way to lay them out, or this site, then please feel free to talk to me about it at <a href="https://github.com/KCErb/cordwainer">the repo</a>.
+  Cordwainer is my notes on how Shoes works.
+  They are written in the style of a tutorial because I learn best when I teach.
+  The goal of these notes/ tutorials is to learn how Shoes works from heel to toe,
+  frontend to backend<i>s</i>, <code>do</code> to <code>end</code>.
+
+  Please feel free to comment on inaccuracies, typos or anything else, I'd love to improve these!
 </h3>
 
-<h1>
-  The Tutorials
-</h1>
+<h2>
+  Executables
+</h2>
+
+  Let's start off by looking at all of the executables that Shoes provides.
+  Understanding the entry point for a program or spec should help put everything
+  else we do into a common perspective. I also found that digging through some of the
+  nuts and bolts here helped me become more familiar with common tools from he Ruby
+  developer's toolkit such as RSpec, Rake, and Rubygems.
 
 <div class="trigger">
   {% assign pages = site.pages | sort:"title" %}
   {% for page in pages %}
-  {% if page.title %}
+  {% if page.category == 'executables' %}
+  <div>
+    <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<br>
+
+<h2>
+  App
+</h2>
+
+Next we'll dig into `app`. For the frontend and backend, `app` is where it all starts.
+
+<br>
+<br>
+
+<div class="trigger">
+  {% assign pages = site.pages | sort:"title" %}
+  {% for page in pages %}
+  {% if page.category == 'app' %}
   <div>
     <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
   </div>
