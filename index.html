@@ -37,18 +37,30 @@ layout: default
 <br>
 
 <h2>
-  App
+  TDT
 </h2>
 
-Next we'll dig into `app`. For the frontend and backend, `app` is where it all starts.
+With the executables explained, I'd now like to dive into what I call Test Driven Tutorials.
+The plan is to go through the codebase file by file on a guided tour using the tests to chart a course.
+If you're not super familiar with RSpec, it's a good idea to read around online to get acquainted but don't worry
+too much about that. In my opinion, RSpec is the sort of tool that you learn by doing and observing more than
+by study. That means in the first few tutorials, I'll spend time explaining some of the basics of RSpec
+such as what we're doing in the tests and why.
+<br>
+As usual, if you see something that doesn't make sense, ask me and I'll include it in the tutorials. I'm not
+afraid of these being too basic so much as I'm afraid of them leaving someone behind.
 
 <br>
 <br>
+
+<h3>
+  Core
+</h3>
 
 <div class="trigger">
   {% assign pages = site.pages | sort:"title" %}
   {% for page in pages %}
-  {% if page.category == 'app' %}
+  {% if page.category == 'tdt-core' %}
   <div>
     <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
   </div>

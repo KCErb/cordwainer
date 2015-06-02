@@ -226,9 +226,10 @@ What this boils down to is that the frontend specs can be run two ways: with the
 The [`:swt`](https://github.com/shoes/shoes4/blob/master/tasks/rspec.rb#L72-L95) namespace can run the frontend (isolation) specs, the backend (integration) specs, or both. Hence the three tasks: `all`, `isolation` and `integration`.
 
 All three of these specs run essentially the same way:
-* `swt_args(args)`
-* stick all of the appropriate file paths into an array
-* `jruby_rspec(files, args)`
+
+  * `swt_args(args)`
+  * stick all of the appropriate file paths into an array
+  * `jruby_rspec(files, args)`
 
 So let's take a look at the first and last methods defined above
 
@@ -253,17 +254,23 @@ Next, `jruby_rspec` takes the `:swt` key and creates an `rspec_opts` from the re
 Next this gets combined with the files array into an RSpec command via the `rspec` method. The output is
 
 ```
-rspec --tty -e ::Shape -rshoes-swt/spec/spec_helper --tag ~no_swt --tag ~fails_on_osx  shoes-swt/spec/shoes/cli_spec.rb shoes-swt/spec/shoes/swt/animation_spec.rb shoes-swt/spec/shoes/swt/app_spec.rb shoes-swt/spec/shoes/swt/arc_spec.rb ... a/bunch/more/files
+rspec --tty -e ::Shape -rshoes-swt/spec/spec_helper --tag ~no_swt --tag ~fails_on_osx  
+shoes-swt/spec/shoes/cli_spec.rb
+shoes-swt/spec/shoes/swt/animation_spec.rb
+shoes-swt/spec/shoes/swt/app_spec.rb
+shoes-swt/spec/shoes/swt/arc_spec.rb
+...
+a/bunch/more/files
 ```
 
 Finally `jruby_run` runs the command with a new `jruby` instance passing in the command (and the start on first thread option if applicable).
 
 ### spec:swt:integration vs spec:core
 
-The primary difference between the way the `swt` specs run the `shoes-core` specs and the way `core` runs them is which `spec_helper` file gets included. After that the rest is the same. The next tutorial will dig into what these `spec_helper` files do and how they specify which backend to test the frontend with so I'll leave off on that for now.
+The primary difference between the way the `swt` specs run the `shoes-core` specs and the way `core` runs them is which `spec_helper` file gets included. `swt` does [this](https://github.com/shoes/shoes4/blob/master/tasks/rspec.rb#L39) while `core` does [this](https://github.com/shoes/shoes4/blob/master/tasks/rspec.rb#L101). After that the rest is the same. The next tutorial will dig into what these `spec_helper` files do and how they specify which backend to test the frontend with, so I'll leave off on that for now.
 
-## Conclusion
+## Overview
 
 So we took a quick spin through a lot of code that supports getting Shoes up and running in a development environment, with an app given, and for testing.
 
-Since these tutorials are for Shoes developers and Shoes is meant to be some kind of TDD / BDD / DDD, the next set of tutorials will walk through the Shoes frontend class by class by looking at how these specs desribe it. 
+Since these tutorials are for Shoes developers and Shoes is meant to be some kind of TDD / BDD / DDD, the next set of tutorials will walk through the Shoes frontend (core) class by class, by looking at how these specs describe it.
