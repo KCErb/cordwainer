@@ -5,7 +5,7 @@ layout: default
 <div class="home">
 
 <h3>
-  Cordwainer is my notes on how Shoes works.
+  Cordwainer is a collection of notes on how Shoes works.
   They are written in the style of a tutorial because I learn best when I teach.
   The goal of these notes/ tutorials is to learn how Shoes works from heel to toe,
   frontend to backend<i>s</i>, <code>do</code> to <code>end</code>.
@@ -22,9 +22,10 @@ layout: default
   else we do into a common perspective. I also found that digging through some of the
   nuts and bolts here helped me become more familiar with common tools from he Ruby
   developer's toolkit such as RSpec, Rake, and Rubygems.
-
+  <br>
+  <br>
 <div class="trigger">
-  {% assign pages = site.pages | sort:"title" %}
+  {% assign pages = site.pages | sort:"order" %}
   {% for page in pages %}
   {% if page.category == 'executables' %}
   <div>
@@ -58,7 +59,7 @@ afraid of these being too basic so much as I'm afraid of them leaving someone be
 </h3>
 
 <div class="trigger">
-  {% assign pages = site.pages | sort:"title" %}
+  {% assign pages = site.pages | sort:"order" %}
   {% for page in pages %}
   {% if page.category == 'tdt-core' %}
   <div>

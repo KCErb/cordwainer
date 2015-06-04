@@ -1,11 +1,12 @@
 ---
 layout: page
-title: 3. The Tasks
+title: The Tasks
+order: 3
 category: executables
-permalink: /tasks/
+permalink: /executables/tasks/
 ---
 
-In the [previous](http://kcerb.github.io/cordwainer/start/) [tutorials](http://kcerb.github.io/cordwainer/gems/) we learned how to run a Shoes program from both the development executable `bin/shoes` and the gem executable `shoes`. In both cases we end up in the command-line interface (CLI) and [this line](https://github.com/shoes/shoes4/blob/master/shoes-core/lib/shoes/ui/cli.rb#L58) runs the app!
+In the [previous]({{ site.baseurl }}/executables/start/) [tutorials]({{ site.baseurl }}/executables/gems/) we learned how to run a Shoes program from both the development executable `bin/shoes` and the gem executable `shoes`. In both cases we end up in the command-line interface (CLI) and [this line](https://github.com/shoes/shoes4/blob/master/shoes-core/lib/shoes/ui/cli.rb#L58) runs the app!
 
 I'd like to dig into a real app, frontend, backend etc but first let's wrap up this section on Shoes executables by talking about the rake tasks.
 

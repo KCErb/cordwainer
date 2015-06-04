@@ -1,6 +1,7 @@
 ---
 layout: page
-title: 1. Setup
+title: Setup
+order: 1
 category: tdt-core
 permalink: /tdt-core/setup/
 ---

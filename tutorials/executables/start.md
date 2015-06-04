@@ -1,8 +1,9 @@
 ---
 layout: page
-title: 1. Where to start?
+title: Where to start?
+order: 1
 category: executables
-permalink: /start/
+permalink: /executables/start/
 ---
 
 Let's start by learning everything there is to know about a simple program:

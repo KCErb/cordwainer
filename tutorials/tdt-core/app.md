@@ -1,6 +1,7 @@
 ---
 layout: page
-title: 2. App
+title: App
+order: 2
 category: tdt-core
 permalink: /tdt-core/app/
 ---

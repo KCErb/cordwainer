@@ -1,11 +1,12 @@
 ---
 layout: page
-title: 2. Gem Install
+title: Gem Install
+order: 2
 category: executables
-permalink: /gems/
+permalink: /executables/gems/
 ---
 
-In [the previous tutorial](http://kcerb.github.io/cordwainer/start/) we learned everything there was to know about the
+In [the previous tutorial]({{ site.baseurl }}/executables/start/) we learned everything there was to know about the
 simplest Shoes program I could think of:
 
 ```ruby
